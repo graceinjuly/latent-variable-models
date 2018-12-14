@@ -1,4 +1,4 @@
-cfa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentEdges) {
+cfa_from_edges <- function(X, selectedContinuousID, selectedBinaryID, latentEdges) {
 	library(lavaan)
   
   # convert to lavaan acceptable format
@@ -24,7 +24,7 @@ cfa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentEdges) {
   
   fc_IDs <- rvec[[2]]
   fc_IDs <- fc_IDs[order(fc_IDs)]
-  fc_IDs <- convert2names(fc_IDs, prefix="F")
+  fc_IDs <- convert2names(fc_IDs, prefix="factor")
   
   # res.mat <- resid(fit)
   # res.mat <- res.mat$cov
@@ -33,6 +33,46 @@ cfa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentEdges) {
 
   
 	return(matList)
+}
+
+cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
+  library(lavaan)
+  
+  # convert to lavaan acceptable format
+  binaryIDs <- convert2names(selectedBinaryID)
+  continuousIDs <- convert2names(selectedContinuousID)
+  df <- data.frame(X)
+  
+  latentEdges <- which(adjM==1, arr.ind=T)
+  latentEdges <- latentEdges[, c(2, 1)]
+  colnames(latentEdges) <- NULL
+  print(latentEdges)
+  # The model
+  rvec <- convert2lav(latentEdges)
+  myModel <- rvec[[1]]
+  cat("The model is specified as follows:")
+  cat(myModel)
+  
+  fit <- cfa(myModel, data=df, ordered=binaryIDs)
+  cat('\nsummary: \n')
+  summary(fit, standardized=TRUE)
+  
+  
+  
+  obs_IDs <- c(selectedBinaryID, selectedContinuousID)
+  obs_IDs <- obs_IDs[order(obs_IDs)]
+  obs_IDs <- convert2names(obs_IDs)
+  
+  fc_IDs <- c(1:ncol(adjM))
+  fc_IDs <- convert2names(fc_IDs, prefix="factor")
+  
+  # res.mat <- resid(fit)
+  # res.mat <- res.mat$cov
+  
+  matList <- assign_corr(fc_IDs, obs_IDs, fit)
+  
+  
+  return(matList)
 }
 
 assign_corr <- function(fc_IDs, obs_IDs, fit) {
@@ -112,7 +152,7 @@ convert2lav <- function(edgeMatrix) {
       temp_ID <- edgeMatrix[rid, 1]
       fc_IDs[[i]] <- temp_ID
       i <- i + 1
-      myModel <-  paste(myModel, '\nF', temp_ID, ' =~ V', edgeMatrix[rid, 2], sep="")
+      myModel <-  paste(myModel, '\nfactor', temp_ID, ' =~ V', edgeMatrix[rid, 2], sep="")
     }
     
   }
