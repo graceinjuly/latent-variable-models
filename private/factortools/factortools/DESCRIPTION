@@ -1,0 +1,14 @@
+Package: factortools
+Type: Package
+Title: Factor analysis and confirmatory factor analysis for Inguo
+Version: 0.1
+Date: 2018-12-17
+Author: Wu Yu <wu_yu@nec.cn>
+Maintainer: Wu Yu <wu_yu@nec.cn>
+Description: A simple package offereing the functionalities of factor analysis and confirmatory factor analysis in Inguo software.
+License: GPL (>= 2)
+RoxygenNote: 6.1.0
+Encoding: UTF-8
+Depends: R (>= 3.0.1)
+Imports: lavaan, semTools
+LazyData: yes
