@@ -5,7 +5,7 @@
 #' @param selectedContinuousID Vector of indices of continuous variables
 #' @param selectedBinaryID Vector of indices of binary or ordinal categorical variables
 #' @param latentNum An integer for specifying the number of latent variables (default 2)
-#' @return A list consisting of correlation matrix, loading factors and fit measures
+#' @return A list consisting of correlation matrix, loading factors, factor scores, and fit measures
 #' @export 
 fa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentNum=2) {
   # library(lavaan)
@@ -28,6 +28,7 @@ fa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentNum=2) {
   
   mat1 <- fit@loading
   mat2 <- fit@phi
+  mat3 <- lavaan::lavPredict(unrotated)
   
   colnames(mat1) <- NULL
   rownames(mat1) <- NULL
@@ -35,9 +36,12 @@ fa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentNum=2) {
   colnames(mat2) <- NULL
   rownames(mat2) <- NULL
   
+  colnames(mat3) <- NULL
+  rownames(mat3) <- NULL
+  
   s <- semTools::fitMeasures(unrotated, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr"))
   s <- c(s)
-  return(list(mat2, mat1, s))
+  return(list(mat2, mat1, mat3, s))
   
 }
 

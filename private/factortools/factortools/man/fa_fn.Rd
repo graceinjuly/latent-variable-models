@@ -16,7 +16,7 @@ fa_fn(X, selectedContinuousID, selectedBinaryID, latentNum = 2)
 \item{latentNum}{An integer for specifying the number of latent variables (default 2)}
 }
 \value{
-A list consisting of correlation matrix, loading factors and fit measures
+A list consisting of correlation matrix, loading factors, factor scores, and fit measures
 }
 \description{
 Perform factor analysis on a given dataset

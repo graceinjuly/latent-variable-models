@@ -16,7 +16,7 @@ cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM)
 \item{adjM}{The adjacency matrix between indicators and latent variables, value of 1 indicate a connection}
 }
 \value{
-A list consisting of correlation matrix, loading factors  and fit measures
+A list consisting of correlation matrix, loading factors, factor scores  and fit measures
 }
 \description{
 Performs confirmatory factor analysis on a user-specified network

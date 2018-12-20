@@ -42,7 +42,7 @@ cfa_from_edges <- function(X, selectedContinuousID, selectedBinaryID, latentEdge
 #' @param selectedContinuousID Vector of indices of continuous variables
 #' @param selectedBinaryID Vector of indices of binary or ordinal categorical variables
 #' @param adjM The adjacency matrix between indicators and latent variables, value of 1 indicate a connection
-#' @return A list consisting of correlation matrix, loading factors  and fit measures
+#' @return A list consisting of correlation matrix, loading factors, factor scores  and fit measures
 #' @export  
 cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
   # library(lavaan)
@@ -85,7 +85,7 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
 }
 
 assign_corr <- function(fc_IDs, obs_IDs, fit) {
-  mat1 <- matrix(nrow = length(obs_IDs),
+  weightM <- matrix(nrow = length(obs_IDs),
                 ncol = length(fc_IDs), 
                 dimnames = list(obs_IDs, fc_IDs))
   
@@ -96,22 +96,22 @@ assign_corr <- function(fc_IDs, obs_IDs, fit) {
     lhs <- df1[row, "lhs"]
     rhs <- df1[row, "rhs"]
     est <- df1[row, "est"]
-    mat1[rhs, lhs] <- est
+    weightM[rhs, lhs] <- est
   }
   
   df2 <- params_dframe[(params_dframe$op == '~~'),]
   df2 <- df2[(df2$lhs  %in% fc_IDs),]
   df2 <- df2[(df2$rhs  %in% fc_IDs),]
   
-  mat2 <- matrix(nrow = length(fc_IDs),
+  factorcorrM <- matrix(nrow = length(fc_IDs),
                  ncol = length(fc_IDs), 
                  dimnames = list(fc_IDs, fc_IDs))
   for (row in 1:nrow(df2)) {
     lhs <- df2[row, "lhs"]
     rhs <- df2[row, "rhs"]
     est <- df2[row, "est"]
-    mat2[lhs, rhs] <- est
-    mat2[rhs, lhs] <- est
+    factorcorrM[lhs, rhs] <- est
+    factorcorrM[rhs, lhs] <- est
   }
   
   # res.mat <- resid(fit)
@@ -124,15 +124,26 @@ assign_corr <- function(fc_IDs, obs_IDs, fit) {
   #     mat[j, i] <- res.mat[i,j]
   #   }
   # }
-  colnames(mat1) <- NULL
-  rownames(mat1) <- NULL
-
-  colnames(mat2) <- NULL
-  rownames(mat2) <- NULL
   
   s <- lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr"))
   s <- c(s)
-  return(list(mat2, mat1, s))
+  
+  mat3_tmp <- lavaan::lavPredict(fit)
+  factorscoresM <- matrix(nrow = nrow(mat3_tmp),
+                 ncol = length(fc_IDs))
+  colnames(factorscoresM) <- fc_IDs
+  factorscoresM[, colnames(mat3_tmp)] <- mat3_tmp
+  
+  colnames(weightM) <- NULL
+  rownames(weightM) <- NULL
+  
+  colnames(factorcorrM) <- NULL
+  rownames(factorcorrM) <- NULL
+  
+  rownames(factorscoresM) <- NULL
+  colnames(factorscoresM) <- NULL
+  
+  return(list(factorcorrM, weightM, factorscoresM, s))
 }
 
 convert2names <- function(selectedIDs, prefix='V'){
