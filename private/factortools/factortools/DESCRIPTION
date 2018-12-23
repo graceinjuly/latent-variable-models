@@ -10,5 +10,5 @@ License: GPL (>= 2)
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 Depends: R (>= 3.0.1)
-Imports: lavaan, semTools
+Imports: lavaan, semTools, GPArotation
 LazyData: yes
