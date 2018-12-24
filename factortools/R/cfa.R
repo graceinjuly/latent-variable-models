@@ -5,7 +5,7 @@
 #' @param selectedContinuousID Vector of indices of continuous variables
 #' @param selectedBinaryID Vector of indices of binary or ordinal categorical variables
 #' @param adjM The adjacency matrix between indicators and latent variables, value of 1 indicate a connection
-#' @param lav_estimator Theestimatortobeused. Canbeoneofthefollowing: "ML" formaximumlikelihood, "GLS" forgeneralizedleastsquares, "WLS" forweightedleastsquares(sometimescalledADF estimation), "ULS" for unweighted least squares and "DWLS" for diagonally weighted least squares. These are the main options that affect the estimation. For convenience, the "ML" option can be extended as "MLM", "MLMV", "MLMVS", "MLF", and "MLR"
+#' @param lav_estimator The estimator to be used. Can be one of the following: "ML" for maximum likelihood, "GLS" for generalized leastsquares, "WLS" for weighted least squares (sometimes called ADF estimation), "ULS" for unweighted least squares and "DWLS" for diagonally weighted least squares. These are the main options that affect the estimation. For convenience, the "ML" option can be extended as "MLM", "MLMV", "MLMVS", "MLF", and "MLR"
 #' @param predict_method A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.
 #' @param verbose TRUE or FALSE, whether to output debug information. 
 #' @return A list consisting of correlation matrix, loading factors, factor scores  and fit measures
