@@ -1,40 +1,3 @@
-cfa_from_edges <- function(X, selectedContinuousID, selectedBinaryID, latentEdges) {
-	# library(lavaan)
-  
-  # convert to lavaan acceptable format
-  binaryIDs <- convert2names(selectedBinaryID)
-  continuousIDs <- convert2names(selectedContinuousID)
-  df <- data.frame(X)
-  
-  # The model
-  rvec <- convert2lav(latentEdges)
-  myModel <- rvec[[1]]
-  cat("The model is specified as follows:")
-  cat(myModel)
-  
-  fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs)
-  cat('\nsummary: \n')
-  summary(fit, standardized=TRUE)
-  
-  
-  
-  obs_IDs <- c(selectedBinaryID, selectedContinuousID)
-  obs_IDs <- obs_IDs[order(obs_IDs)]
-  obs_IDs <- convert2names(obs_IDs)
-  
-  fc_IDs <- rvec[[2]]
-  fc_IDs <- fc_IDs[order(fc_IDs)]
-  fc_IDs <- convert2names(fc_IDs, prefix="factor")
-  
-  # res.mat <- resid(fit)
-  # res.mat <- res.mat$cov
-
-  matList <- assign_corr(fc_IDs, obs_IDs, fit)
-
-  
-	return(matList)
-}
-
 #' Confirmatory Factor Analysis
 #' 
 #' Performs confirmatory factor analysis on a user-specified network
@@ -42,9 +5,14 @@ cfa_from_edges <- function(X, selectedContinuousID, selectedBinaryID, latentEdge
 #' @param selectedContinuousID Vector of indices of continuous variables
 #' @param selectedBinaryID Vector of indices of binary or ordinal categorical variables
 #' @param adjM The adjacency matrix between indicators and latent variables, value of 1 indicate a connection
+#' @param lav_estimator Theestimatortobeused. Canbeoneofthefollowing: "ML" formaximumlikelihood, "GLS" forgeneralizedleastsquares, "WLS" forweightedleastsquares(sometimescalledADF estimation), "ULS" for unweighted least squares and "DWLS" for diagonally weighted least squares. These are the main options that affect the estimation. For convenience, the "ML" option can be extended as "MLM", "MLMV", "MLMVS", "MLF", and "MLR"
+#' @param predict_method A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.
+#' @param verbose TRUE or FALSE, whether to output debug information. 
 #' @return A list consisting of correlation matrix, loading factors, factor scores  and fit measures
 #' @export  
-cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
+cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
+                            lav_estimator='default', predict_method='EBM',
+                            verbose=FALSE) {
   # library(lavaan)
   
   # convert to lavaan acceptable format
@@ -62,9 +30,11 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
   cat("The model is specified as follows:")
   cat(myModel)
   
-  fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs)
-  # cat('\nsummary: \n')
-  # summary(fit, standardized=TRUE)
+  fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs, estimator=lav_estimator)
+  if(verbose){
+    cat('\nsummary: \n')
+    lavaan::summary(fit, standardized=TRUE)
+  }
   
   
   
@@ -78,13 +48,13 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM) {
   # res.mat <- resid(fit)
   # res.mat <- res.mat$cov
   
-  matList <- assign_corr(fc_IDs, obs_IDs, fit)
+  matList <- assign_corr(fc_IDs, obs_IDs, fit, method=predict_method)
   
   
   return(matList)
 }
 
-assign_corr <- function(fc_IDs, obs_IDs, fit) {
+assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   weightM <- matrix(nrow = length(obs_IDs),
                 ncol = length(fc_IDs), 
                 dimnames = list(obs_IDs, fc_IDs))
@@ -128,7 +98,7 @@ assign_corr <- function(fc_IDs, obs_IDs, fit) {
   s <- lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr"))
   s <- c(s)
   
-  mat3_tmp <- lavaan::lavPredict(fit)
+  mat3_tmp <- lavaan::lavPredict(fit, method=method)
   factorscoresM <- matrix(nrow = nrow(mat3_tmp),
                  ncol = length(fc_IDs))
   colnames(factorscoresM) <- fc_IDs

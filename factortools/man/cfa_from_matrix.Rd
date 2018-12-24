@@ -4,7 +4,8 @@
 \alias{cfa_from_matrix}
 \title{Confirmatory Factor Analysis}
 \usage{
-cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM)
+cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM,
+  lav_estimator = "default", predict_method = "EBM", verbose = FALSE)
 }
 \arguments{
 \item{X}{A matrix (n-by-d) containing n data samples of d variables}
@@ -14,6 +15,12 @@ cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM)
 \item{selectedBinaryID}{Vector of indices of binary or ordinal categorical variables}
 
 \item{adjM}{The adjacency matrix between indicators and latent variables, value of 1 indicate a connection}
+
+\item{lav_estimator}{Theestimatortobeused. Canbeoneofthefollowing: "ML" formaximumlikelihood, "GLS" forgeneralizedleastsquares, "WLS" forweightedleastsquares(sometimescalledADF estimation), "ULS" for unweighted least squares and "DWLS" for diagonally weighted least squares. These are the main options that affect the estimation. For convenience, the "ML" option can be extended as "MLM", "MLMV", "MLMVS", "MLF", and "MLR"}
+
+\item{predict_method}{A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.}
+
+\item{verbose}{TRUE or FALSE, whether to output debug information.}
 }
 \value{
 A list consisting of correlation matrix, loading factors, factor scores  and fit measures
