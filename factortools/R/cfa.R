@@ -7,12 +7,13 @@
 #' @param adjM The adjacency matrix between indicators and latent variables, value of 1 indicate a connection
 #' @param lav_estimator The estimator to be used. Can be one of the following: "ML" for maximum likelihood, "GLS" for generalized leastsquares, "WLS" for weighted least squares (sometimes called ADF estimation), "ULS" for unweighted least squares and "DWLS" for diagonally weighted least squares. These are the main options that affect the estimation. For convenience, the "ML" option can be extended as "MLM", "MLMV", "MLMVS", "MLF", and "MLR"
 #' @param predict_method A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.
-#' @param verbose TRUE or FALSE, whether to output debug information. 
+#' @param verbose Boolean, whether to output debug information. 
+#' @param std.lv Boolean, if the argument std.lv=TRUE is used, the factor loadings of the first indicator of each latent variable will no longer be fixed to 1.
 #' @return A list consisting of correlation matrix, loading factors, factor scores  and fit measures
 #' @export  
 cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
                             lav_estimator='default', predict_method='EBM',
-                            verbose=FALSE) {
+                            verbose=FALSE, std.lv=FALSE) {
   # library(lavaan)
   
   # convert to lavaan acceptable format
@@ -30,7 +31,8 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
   cat("The model is specified as follows:")
   cat(myModel)
   
-  fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs, estimator=lav_estimator)
+  fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs, estimator=lav_estimator,
+                     std.lv=std.lv)
   if(verbose){
     cat('\nsummary: \n')
     lavaan::summary(fit, standardized=TRUE)

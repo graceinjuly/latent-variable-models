@@ -5,7 +5,8 @@
 \title{Confirmatory Factor Analysis}
 \usage{
 cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM,
-  lav_estimator = "default", predict_method = "EBM", verbose = FALSE)
+  lav_estimator = "default", predict_method = "EBM", verbose = FALSE,
+  std.lv = FALSE)
 }
 \arguments{
 \item{X}{A matrix (n-by-d) containing n data samples of d variables}
@@ -20,7 +21,9 @@ cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM,
 
 \item{predict_method}{A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.}
 
-\item{verbose}{TRUE or FALSE, whether to output debug information.}
+\item{verbose}{Boolean, whether to output debug information.}
+
+\item{std.lv}{Boolean, if the argument std.lv=TRUE is used, the factor loadings of the first indicator of each latent variable will no longer be fixed to 1.}
 }
 \value{
 A list consisting of correlation matrix, loading factors, factor scores  and fit measures
