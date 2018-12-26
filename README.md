@@ -5,7 +5,11 @@
 To install this package, use 
 
 ```R
+# install the master branch
 install_github("while519/latent-variable-models", subdir="factortools")
+
+# install the test-dev branch
+install_github("while519/latent-variable-models", ref = "test-dev", subdir="factortools")
 ```
 
 Two functions are used respectively for doing CFA and FA, which are *cfa_from_matrix* and *fa_fn*
