@@ -24,7 +24,9 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
   latentEdges <- which(adjM==1, arr.ind=T)
   latentEdges <- latentEdges[, c(2, 1)]
   colnames(latentEdges) <- NULL
-  # print(latentEdges)
+  if(verbose){
+    print(latentEdges)
+  }
   # The model
   rvec <- convert2lav(latentEdges)
   myModel <- rvec[[1]]
@@ -40,8 +42,7 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
   
   
   
-  obs_IDs <- c(selectedBinaryID, selectedContinuousID)
-  obs_IDs <- obs_IDs[order(obs_IDs)]
+  obs_IDs <- c(1:nrow(adjM))
   obs_IDs <- convert2names(obs_IDs)
   
   fc_IDs <- c(1:ncol(adjM))
@@ -97,8 +98,10 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   #   }
   # }
   
-  s <- lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr"))
-  s <- c(s)
+  s <- tryCatch(
+  lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr")),
+  error = function(e) {warning('fit measures not available'); s <-c(); return(s)}
+  )
   
   mat3_tmp <- lavaan::lavPredict(fit, method=method)
   factorscoresM <- matrix(nrow = nrow(mat3_tmp),
