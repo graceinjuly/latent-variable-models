@@ -60,7 +60,11 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   weightM <- matrix(nrow = length(obs_IDs),
                 ncol = length(fc_IDs), 
                 dimnames = list(obs_IDs, fc_IDs))
-  
+
+  weightMse <- matrix(nrow = length(obs_IDs),
+                ncol = length(fc_IDs), 
+                dimnames = list(obs_IDs, fc_IDs))
+
   params_dframe <- lavaan::parameterEstimates(fit, standardized = TRUE)
   df1 <- params_dframe[(params_dframe$op == '=~'),]
   
@@ -69,6 +73,9 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
     rhs <- df1[row, "rhs"]
     est <- df1[row, "est"]
     weightM[rhs, lhs] <- est
+
+    se <- df1[row, "se"]
+    weightMse[rhs, lhs] <- se
   }
   
   df2 <- params_dframe[(params_dframe$op == '~~'),]
@@ -108,6 +115,9 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   
   colnames(weightM) <- NULL
   rownames(weightM) <- NULL
+
+  colnames(weightMse) <- NULL
+  rownames(weightMse) <- NULL 
   
   colnames(factorcorrM) <- NULL
   rownames(factorcorrM) <- NULL
@@ -115,7 +125,7 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   rownames(factorscoresM) <- NULL
   colnames(factorscoresM) <- NULL
   
-  return(list(factorcorrM, weightM, factorscoresM, s))
+  return(list(factorcorrM, weightM, factorscoresM, s, weightMse))
 }
 
 convert2names <- function(selectedIDs, prefix='V'){
@@ -152,4 +162,3 @@ convert2lav <- function(edgeMatrix) {
   fc_IDs <- unlist(fc_IDs, use.names=FALSE)
   return(list(myModel, fc_IDs))
 }
-
