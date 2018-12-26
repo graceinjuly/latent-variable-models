@@ -42,3 +42,8 @@ see lavPredict function in the manual, I quote the following:
 > In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach. 
 
 However, all options are valid to run. In accordance to the manual, I would like to avoid the bad practice. Note we could also make choices about the function used for optimization in the *optim.method*.
+
+### This library is buit by the following command
+```bash
+R CMD INSTALL --build factortools
+```
