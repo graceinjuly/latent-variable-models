@@ -1,6 +1,6 @@
 rm(list = ls())
 
-setwd('D:/git-repo/latent-variable-models/latent-variable-models/experiments/clca/')
+setwd('D:/Documents/git-repo/latent-variable-models/latent-variable-models/experiments/clca/')
 
 library(poLCA)
 
