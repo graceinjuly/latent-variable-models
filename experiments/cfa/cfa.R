@@ -1,6 +1,6 @@
 rm(list = ls())
 
-setwd('D:/git-repo/latent-variable-models/latent-variable-models/experiments/cfa/')
+setwd('D:/Documents/git-repo/latent-variable-models/latent-variable-models/experiments/cfa/')
 
 library(lavaan)
 
