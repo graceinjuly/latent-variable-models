@@ -1,7 +1,7 @@
 Package: factortools
 Type: Package
 Title: Factor analysis and confirmatory factor analysis for Inguo
-Version: 0.3
+Version: 0.3.1
 Date: 2018-12-17
 Author: Wu Yu <wu_yu@nec.cn>
 Maintainer: Wu Yu <wu_yu@nec.cn>
