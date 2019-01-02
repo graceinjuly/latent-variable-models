@@ -16,7 +16,12 @@ fa_fn <- function(X, selectedContinuousID, selectedBinaryID, latentNum=2) {
   continuousIDs <- convert2names(selectedContinuousID)
   df <- data.frame(X)
   
-  unrotated  <- semTools::efaUnrotate(X, nf = latentNum, ordered=binaryIDs)
+  if(length(selectedBinaryID) == 0){
+    unrotated  <- semTools::efaUnrotate(X, nf = latentNum)
+  } else
+  {
+    unrotated  <- semTools::efaUnrotate(X, nf = latentNum, ordered=binaryIDs)
+  }
   fit <- semTools::oblqRotate(unrotated, method = "quartimin")
   
   obs_IDs <- c(selectedBinaryID, selectedContinuousID)
