@@ -140,16 +140,26 @@ convert2lav <- function(edgeMatrix) {
   fc_IDs <- list()
   i <- 1
   myModel <- ""
+  jj <- 0
   for(rid in 1:nrow(edgeMatrix)) {
     if(identical(temp_ID, edgeMatrix[rid, 1])){
       myModel <-  paste(myModel, ' + V', edgeMatrix[rid, 2], sep="")
+      jj <- jj + 1
     } else{
+      if(jj == 1){
+        myModel <-  paste(myModel, '\nV', edgeMatrix[rid - 1, 2], '~~',
+                          '0.005*V', edgeMatrix[rid - 1, 2], sep="")
+      }
       temp_ID <- edgeMatrix[rid, 1]
       fc_IDs[[i]] <- temp_ID
       i <- i + 1
       myModel <-  paste(myModel, '\nfactor', temp_ID, ' =~ V', edgeMatrix[rid, 2], sep="")
+      jj <- 1
     }
-    
+  }
+  if(jj == 1){
+    myModel <-  paste(myModel, '\nV', edgeMatrix[rid, 2], '~~',
+                      '0.005*V', edgeMatrix[rid, 2], sep="")
   }
   myModel <- paste(myModel, '\n')
   fc_IDs <- unlist(fc_IDs, use.names=FALSE)
