@@ -11,4 +11,8 @@ df[, ] <- lapply(df[, ], ordered)
 myModel <- readLines('../data/benchmarks/u-u-6-model.lav')
 
 fit <- cfa(myModel, data=df)
+
+xx <- lavPredict(fit)
+print(xx)
+
 summary(fit, standardized=TRUE)
