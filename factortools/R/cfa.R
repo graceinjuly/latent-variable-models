@@ -18,11 +18,6 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
                             verbose=FALSE, std.lv=FALSE, iter_max=10000,
                             require_factrscore=TRUE) {
   
-  # convert to lavaan acceptable format
-  binaryIDs <- convert2names(selectedBinaryID)
-  continuousIDs <- convert2names(selectedContinuousID)
-  df <- data.frame(X)
-  
   # convert adjacent matrix to edges
   latentEdges <- which(adjM==1, arr.ind=T)
   latentEdges <- latentEdges[, c(2, 1)]
@@ -36,6 +31,11 @@ cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
   myModel <- rvec[[1]]
   cat("The model is specified as follows:")
   cat(myModel)
+  
+  # convert to lavaan acceptable format
+  binaryIDs <- convert2names(selectedBinaryID)
+  continuousIDs <- convert2names(selectedContinuousID)
+  df <- data.frame(X)
   
   # call lavaan
   fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs, estimator=lav_estimator,
@@ -139,7 +139,7 @@ convert2lav <- function(edgeMatrix) {
   edgeMatrix <- edgeMatrix[order(edgeMatrix[,1]), ]
   
   temp_ID = NULL
-  fc_IDs <- list()
+  sif_IDs <- list()
   i <- 1
   myModel <- ""
   jj <- 0
@@ -151,9 +151,9 @@ convert2lav <- function(edgeMatrix) {
       if(jj == 1){
         myModel <-  paste(myModel, '\nV', edgeMatrix[rid - 1, 2], '~~',
                           '0.005*V', edgeMatrix[rid - 1, 2], sep="")
+        sif_IDs <- edgeMatrix[rid - 1, 2]
       }
       temp_ID <- edgeMatrix[rid, 1]
-      fc_IDs[[i]] <- temp_ID
       i <- i + 1
       myModel <-  paste(myModel, '\nfactor', temp_ID, ' =~ V', edgeMatrix[rid, 2], sep="")
       jj <- 1
@@ -162,9 +162,10 @@ convert2lav <- function(edgeMatrix) {
   if(jj == 1){
     myModel <-  paste(myModel, '\nV', edgeMatrix[rid, 2], '~~',
                       '0.005*V', edgeMatrix[rid, 2], sep="")
+    sif_IDs <- edgeMatrix[rid, 2]
   }
   myModel <- paste(myModel, '\n')
-  fc_IDs <- unlist(fc_IDs, use.names=FALSE)
-  return(list(myModel, fc_IDs))
+  sif_IDs <- unlist(sif_IDs, use.names=FALSE)
+  return(list(myModel, sif_IDs))
 }
 
