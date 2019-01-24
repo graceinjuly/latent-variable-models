@@ -6,7 +6,7 @@
 \usage{
 cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM,
   lav_estimator = "default", predict_method = "EBM", verbose = FALSE,
-  std.lv = FALSE)
+  std.lv = FALSE, iter_max = 10000, require_factrscore = TRUE)
 }
 \arguments{
 \item{X}{A matrix (n-by-d) containing n data samples of d variables}
@@ -24,6 +24,10 @@ cfa_from_matrix(X, selectedContinuousID, selectedBinaryID, adjM,
 \item{verbose}{Boolean, whether to output debug information.}
 
 \item{std.lv}{Boolean, if the argument std.lv=TRUE is used, the factor loadings of the first indicator of each latent variable will no longer be fixed to 1.}
+
+\item{iter_max}{Integer, maximum number of iterations.}
+
+\item{require_factrscore}{Boolean, if TRUE compute the factor scores for latent factors.}
 }
 \value{
 A list consisting of correlation matrix, loading factors, factor scores  and fit measures
