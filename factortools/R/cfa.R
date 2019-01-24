@@ -9,55 +9,63 @@
 #' @param predict_method A character string. In the linear case (when the indicators are continuous), the possible options are "regression" or "Bartlett". In the categorical case, the two options are "EBM" for the Empirical Bayes Modal approach, and "ML" for the maximum likelihood approach.
 #' @param verbose Boolean, whether to output debug information. 
 #' @param std.lv Boolean, if the argument std.lv=TRUE is used, the factor loadings of the first indicator of each latent variable will no longer be fixed to 1.
+#' @param iter_max Integer, maximum number of iterations.
+#' @param require_factrscore Boolean, if TRUE compute the factor scores for latent factors. 
 #' @return A list consisting of correlation matrix, loading factors, factor scores  and fit measures
 #' @export  
 cfa_from_matrix <- function(X, selectedContinuousID, selectedBinaryID, adjM,
                             lav_estimator='default', predict_method='EBM',
-                            verbose=FALSE, std.lv=FALSE) {
-  # library(lavaan)
+                            verbose=FALSE, std.lv=FALSE, iter_max=10000,
+                            require_factrscore=TRUE) {
   
   # convert to lavaan acceptable format
   binaryIDs <- convert2names(selectedBinaryID)
   continuousIDs <- convert2names(selectedContinuousID)
   df <- data.frame(X)
   
+  # convert adjacent matrix to edges
   latentEdges <- which(adjM==1, arr.ind=T)
   latentEdges <- latentEdges[, c(2, 1)]
   colnames(latentEdges) <- NULL
   if(verbose){
     print(latentEdges)
   }
+
   # The model
   rvec <- convert2lav(latentEdges)
   myModel <- rvec[[1]]
   cat("The model is specified as follows:")
   cat(myModel)
   
+  # call lavaan
   fit <- lavaan::cfa(myModel, data=df, ordered=binaryIDs, estimator=lav_estimator,
-                     std.lv=std.lv)
+                     std.lv=std.lv, verbose=verbose, control=list(iter.max=iter_max))
   if(verbose){
     cat('\nsummary: \n')
+    # fit summary
     lavaan::summary(fit, standardized=TRUE)
+
+    # gradient information
+    cat(lavaan::lavInspect(fit, "optim.gradient"))
   }
   
   
-  
+  # parsing names of factors and variables
   obs_IDs <- c(1:nrow(adjM))
   obs_IDs <- convert2names(obs_IDs)
   
   fc_IDs <- c(1:ncol(adjM))
   fc_IDs <- convert2names(fc_IDs, prefix="factor")
   
-  # res.mat <- resid(fit)
-  # res.mat <- res.mat$cov
-  
-  matList <- assign_corr(fc_IDs, obs_IDs, fit, method=predict_method)
-  
+  # extracting information
+  matList <- assign_corr(fc_IDs, obs_IDs, fit, method=predict_method,
+    require_factrscore=require_factrscore)
   
   return(matList)
 }
 
-assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
+assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM', 
+                        require_factrscore=TRUE) {
   weightM <- matrix(nrow = length(obs_IDs),
                 ncol = length(fc_IDs), 
                 dimnames = list(obs_IDs, fc_IDs))
@@ -76,6 +84,7 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
   df2 <- df2[(df2$lhs  %in% fc_IDs),]
   df2 <- df2[(df2$rhs  %in% fc_IDs),]
   
+  # correlation matrix between factors
   factorcorrM <- matrix(nrow = length(fc_IDs),
                  ncol = length(fc_IDs), 
                  dimnames = list(fc_IDs, fc_IDs))
@@ -87,36 +96,29 @@ assign_corr <- function(fc_IDs, obs_IDs, fit, method='EBM') {
     factorcorrM[rhs, lhs] <- est
   }
   
-  # res.mat <- resid(fit)
-  # res.mat <- res.mat$cov
-  # # Matrix::forceSymmetric(res.mat, uplo = "L")
-  # 
-  # for (i in 1:length(obs_IDs)){
-  #   for (j in 1:i){
-  #     mat[i, j] <- res.mat[i,j]
-  #     mat[j, i] <- res.mat[i,j]
-  #   }
-  # }
-  
+  # fit measure may not be computed
   s <- tryCatch(
   lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "rmsea", "cfi", "srmr")),
   error = function(e) {warning('fit measures not available'); s <-c(); return(s)}
   )
   
-  mat3_tmp <- lavaan::lavPredict(fit, method=method)
-  factorscoresM <- matrix(nrow = nrow(mat3_tmp),
-                 ncol = length(fc_IDs))
-  colnames(factorscoresM) <- fc_IDs
-  factorscoresM[, colnames(mat3_tmp)] <- mat3_tmp
+  if(require_factrscore){
+        mat3_tmp <- lavaan::lavPredict(fit, method=method, optim.method='bfgs')
+        factorscoresM <- matrix(nrow = nrow(mat3_tmp),
+                                ncol = length(fc_IDs))
+        colnames(factorscoresM) <- fc_IDs
+        factorscoresM[, colnames(mat3_tmp)] <- mat3_tmp
+        rownames(factorscoresM) <- NULL
+        colnames(factorscoresM) <- NULL
+    } else{
+      factorscoresM <- NULL
+    }
   
   colnames(weightM) <- NULL
   rownames(weightM) <- NULL
   
   colnames(factorcorrM) <- NULL
   rownames(factorcorrM) <- NULL
-  
-  rownames(factorscoresM) <- NULL
-  colnames(factorscoresM) <- NULL
   
   return(list(factorcorrM, weightM, factorscoresM, s))
 }
